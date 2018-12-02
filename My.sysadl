@@ -1,0 +1,219 @@
+Model SysADLArchitecture;
+package SysADL.types {
+	value type Int {
+	}
+	value type Boolean {
+	}
+	value type String {
+	}
+	value type Void {
+	}
+	value type Real {
+	}
+enum Ordenacao {
+		ascendente, descendente
+	}
+	datatype ListaDePalavras {
+		attributes:
+		listaPalavras : String;
+	}
+}
+Requirement Analisar_TextoFR ( 1 ) {
+	text =
+	"É um sistema de processamento de texto que basicamente lê um arquivo de texto fornecido como entrada e analisa as palavras contidas nele, sendo exibidas  para o usuário palavras que começam com uma determinada letra ou sequência de caracteres de maneira ordenada"
+	Requirement Ler_TextoFR ( 2 ) {
+		text =
+		"Sistema deve receber um texto através de arquivo enviado pelo cliente"
+	Requirement verificar_arquivoFR ( 10 ) {
+		text = "Verificar se o arquivo recebido é válido"
+		satisfied by Components.ProcessadorArquivoCP;
+		}
+		Requirement processar_arquivoFR ( 11 ) {
+		text =
+			"Percorrer o arquivo e ler o texto contido nele trazendo-o para o sistema"
+		satisfied by Components.ProcessadorArquivoCP;
+		}
+	}
+	Requirement Filtrar_TextoFR ( 3 ) {
+		text =
+		"Sistema deve filtrar o texto a partir de um padrão e então ordenar as palavras a partir das entradas do cliente"
+		Requirement Separar_PalavrasFR ( 4 ) {
+		text =
+			"Deve ser criada uma lista de palavras a partir do texto lido originalmente"
+		satisfied by Components.SeparadorTextoCP;
+		}
+		Requirement Ordenar_PalavrasFR ( 5 ) {
+		text = "O sistema deve ser capaz de ordenar ascendente ou descendente"
+		}
+	}
+	Requirement Exibir_ao_UsuarioFR ( 8 ) {
+	text =
+		"O sistema deve ser capaz de exibir ao usuário o resultado do processamento"
+	satisfied by Components.ExibeResultCP;
+	}
+}
+Requirement Ordernar_AscendenteFR ( 6 ) {
+	text = "Deve ser capaz de ordenar a lista de forma alfanumérica ascendente"
+	satisfied by Components.OrdenaAscCP;
+	derive Analisar_TextoFR.Filtrar_TextoFR.Ordenar_PalavrasFR;
+}
+Requirement Ordenar_DescendenteFR ( 7 ) {
+	text = "Deve ser capaz de ordenar a lista de forma alfanumérica ascendente"
+	satisfied by Components.OrdenaDescCP;
+	derive Analisar_TextoFR.Filtrar_TextoFR.Ordenar_PalavrasFR;
+}
+package Ports {
+	import SysADL.types;
+	port def StringIPT {
+		flow in String
+	}
+	port def StringOPT {
+		flow out String
+	}
+	port def OrdenacaoIPT {
+		flow in Ordenacao
+	}
+	port def OrdenacaoOPT {
+		flow out Ordenacao
+	}
+	port def ListaPalavrasIPT {
+		flow in ListaDePalavras
+	}
+	port def ListaPalavrasOPT {
+		flow out ListaDePalavras
+	}
+}
+package Connectors {
+	import Ports;
+	connector def StringCN {
+		participants:
+		~stringOut : StringOPT;
+		~stringIn : StringIPT;
+		flows:
+		String from stringOut to stringIn
+	}
+	connector def OrdenacaoCN {
+		participants:
+		~ordemOut : OrdenacaoOPT;
+		~ordemIn : OrdenacaoIPT;
+		flows:
+		Ordenacao from ordemOut to ordemIn
+	}
+	connector def ListaPalavrasCN {
+		participants:
+		~listaOut : ListaPalavrasOPT;
+		~listaIn : ListaPalavrasIPT;
+		flows:
+		ListaDePalavras from listaOut to listaIn
+	}
+}
+package Components {
+	import Connectors;
+	import Ports;
+	import SysADL.types;
+	component def Sistema {
+		configuration {
+			components:
+			ProcessadorArquivoCP : ProcessadorArquivoCP {
+				using
+				ports:
+				textoOut : StringOPT;
+			}
+			SeparadorTextoCP : SeparadorTextoCP {
+				using
+				ports:
+				textoIn : StringIPT;
+				filtroIn : StringIPT;
+				listaFiltOut : ListaPalavrasOPT;
+			}
+			LeitorFiltroCP : LeitorFiltroCP {
+				using
+				ports:
+				filtroOut : StringOPT;
+			}
+			OrdenadorTextoCP : OrdenadorTextoCP {
+				using
+				ports:
+				listaFiltIn : ListaPalavrasIPT;
+				ordemIn : OrdenacaoIPT;
+				listaOrdemOut : ListaPalavrasOPT;
+			}
+			LeitorOrdemCP : LeitorOrdemCP {
+				using
+				ports:
+				ordemOut : OrdenacaoOPT;
+			}
+			ExibeResultCP : ExibeResultCP {
+				using
+				ports:
+				listaOrdemIn : ListaPalavrasIPT;
+			}
+			connectors:
+			cn1 : StringCN bindings textoOut = textoIn;
+			cn2 : StringCN bindings filtroOut = filtroIn;
+			cn3 : ListaPalavrasCN bindings listaFiltOut = listaFiltIn;
+			cn4 : OrdenacaoCN bindings ordemOut = ordemIn;
+			cn5 : ListaPalavrasCN bindings listaOrdemOut = listaOrdemIn;
+		}
+	}
+	boundary component def ProcessadorArquivoCP {
+		ports:
+		textoOut : StringOPT;
+	}
+	component def SeparadorTextoCP {
+		ports:
+		textoIn : StringIPT;
+		filtroIn : StringIPT;
+		listaFiltOut : ListaPalavrasOPT;
+	}
+	boundary component def LeitorFiltroCP {
+		ports:
+		filtroOut : StringOPT;
+	}
+	component def OrdenadorTextoCP {
+		ports:
+		listaFiltIn : ListaPalavrasIPT;
+		ordemIn : OrdenacaoIPT;
+		listaOrdemOut : ListaPalavrasOPT;
+		configuration {
+			components:
+			OrdenaAscCP : OrdenaAscCP {
+				using
+				ports:
+				lpdesord1 : ListaPalavrasIPT;
+				lpasc : ListaPalavrasOPT;
+				ordem1 : OrdenacaoIPT;
+			}
+			OrdenaDescCP : OrdenaDescCP {
+				using
+				ports:
+				lpdesord2 : ListaPalavrasIPT;
+				ordem2 : OrdenacaoIPT;
+				lpdesc : ListaPalavrasOPT;
+			}
+			delegations:
+			ordem2 to ordemIn ordem1 to ordemIn lpdesord1 to listaFiltIn lpdesord2 to
+			listaFiltIn lpasc to listaOrdemOut lpdesc to listaOrdemOut
+		}
+	}
+	component def LeitorOrdemCP {
+		ports:
+		ordemOut : OrdenacaoOPT;
+	}
+	boundary component def ExibeResultCP {
+		ports:
+		listaOrdemIn : ListaPalavrasIPT;
+	}
+	component def OrdenaAscCP {
+		ports:
+		lpdesord1 : ListaPalavrasIPT;
+		lpasc : ListaPalavrasOPT;
+		ordem1 : OrdenacaoIPT;
+	}
+	component def OrdenaDescCP {
+		ports:
+		lpdesord2 : ListaPalavrasIPT;
+		ordem2 : OrdenacaoIPT;
+		lpdesc : ListaPalavrasOPT;
+	}
+}
