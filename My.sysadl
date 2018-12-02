@@ -216,4 +216,82 @@ package Components {
 		ordem2 : OrdenacaoIPT;
 		lpdesc : ListaPalavrasOPT;
 	}
+activity def FiltrarTextoAC ( textoOriginal : String, filtro : String ) : (
+	listaPalavras : ListaDePalavras ) {
+		body {
+		actions : SepararPalavrasAN : SepararPalavrasAN {
+				using pins : textoOriginal : String;
+			}
+			FiltrarPalavrasAN : FiltrarPalavrasAN {
+				using pins : listaBruta : ListaDePalavras;
+				filtro : String;
+			}
+			delegate textoOriginal to textoOriginal flow from SepararPalavrasAN to
+			listaBruta
+			delegate listaPalavras to FiltrarPalavrasAN
+			delegate filtro to filtro
+		}
+	}
+	action def SepararPalavrasAN ( textoOriginal : String ) : ListaDePalavras {
+	constraint : post-condition PosSepararPalavrasEQ
+		delegate textoOriginal to textoOriginal
+		delegate SepararPalavrasAN to listaResult
+	}
+	action def FiltrarPalavrasAN ( filtro : String, listaBruta : ListaDePalavras )
+	: ListaDePalavras {
+	constraint : pre-condition PreFiltrarPalavrasEQ post-condition
+		PosFiltrarPalavrasEQ
+		delegate filtro to filtro1
+		delegate filtro to filtro2
+		delegate listaBruta to listaBruta
+		delegate FiltrarPalavrasAN to listaFiltrada
+	}
+	constraint PosSepararPalavrasEQ ( textoOriginal : String ) : ( listaResult :
+	ListaDePalavras ) {
+		equation = "size(listaResult) >= count(' ', textoOriginal) + 1"
+	}
+constraint PreFiltrarPalavrasEQ ( filtro1 : String ) {
+		equation = "count(' ', filtro) == 0"
+	}
+constraint PosFiltrarPalavrasEQ ( filtro2 : String, listaBruta : ListaDePalavras
+	) : ( listaFiltrada : ListaDePalavras ) {
+		equation = "count(filtro, listaBruta) == size(listaFiltrada)"
+	}
+activity def OrdenarPalavrasAC ( listaFiltrada : ListaDePalavras, ordem :
+	Ordenacao ) : ( listaOrdenada : ListaDePalavras ) {
+		body {
+		actions : OrdenarAscAN : OrdenarAscAN {
+				using pins : ordemAsc : Ordenacao;
+				listaFiltrada1 : ListaDePalavras;
+			}
+			OrdenarDescAN : OrdenarDescAN {
+				using pins : ordemDesc : Ordenacao;
+				listaFiltrada2 : ListaDePalavras;
+			}
+			delegate listaOrdenada to OrdenarAscAN
+			delegate listaFiltrada to listaFiltrada1
+			delegate ordem to ordemAsc
+			delegate listaFiltrada to listaFiltrada2
+			delegate ordem to ordemDesc
+			delegate listaOrdenada to OrdenarDescAN
+		}
+	}
+	action def OrdenarAscAN ( listaFiltrada1 : ListaDePalavras, ordemAsc :
+	Ordenacao ) : ListaDePalavras {
+	constraint : post-condition PosOrdenarEQ
+		delegate OrdenarAscAN to listaOrdenada
+		delegate ordemAsc to ordem
+		delegate listaFiltrada1 to listaFiltrada
+	}
+	action def OrdenarDescAN ( listaFiltrada2 : ListaDePalavras, ordemDesc :
+	Ordenacao ) : ListaDePalavras {
+	constraint : post-condition PosOrdenarEQ
+		delegate OrdenarDescAN to listaOrdenada
+		delegate ordemDesc to ordem
+		delegate listaFiltrada2 to listaFiltrada
+	}
+	constraint PosOrdenarEQ ( listaFiltrada : ListaDePalavras, ordem : Ordenacao )
+	: ( listaOrdenada : ListaDePalavras ) {
+		equation = "size(listaOrdenada) == size(listaFiltrada)"
+	}
 }
