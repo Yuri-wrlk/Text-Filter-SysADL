@@ -106,6 +106,13 @@ package Connectors {
 		flows:
 		ListaDePalavras from listaOut to listaIn
 	}
+connector def MultStringCN {
+		participants:
+		~multStringOut : StringOPT [ 1, -1 ];
+		~stringIn : StringIPT;
+		flows:
+		String from multStringOut to stringIn
+	}
 }
 package Components {
 	import Connectors;
@@ -122,14 +129,14 @@ package Components {
 			SeparadorTextoCP : SeparadorTextoCP {
 				using
 				ports:
-				textoIn : StringIPT;
-				filtroIn : StringIPT;
-				listaFiltOut : ListaPalavrasOPT;
+				textoIn1 : StringIPT;
+				filtroIn1 : StringIPT;
+				listaFiltOut1 : ListaPalavrasOPT;
 			}
 			LeitorFiltroCP : LeitorFiltroCP {
 				using
 				ports:
-				filtroOut : StringOPT;
+				filtroOut1 : StringOPT;
 			}
 			OrdenadorTextoCP : OrdenadorTextoCP {
 				using
@@ -148,12 +155,27 @@ package Components {
 				ports:
 				listaOrdemIn : ListaPalavrasIPT;
 			}
+			LeitorFiltroCP : LeitorFiltroCP {
+				using
+				ports:
+				filtroOut2 : StringOPT;
+			}
+			SeparadorTextoCP : SeparadorTextoCP {
+				using
+				ports:
+				textoIn2 : StringIPT;
+				filtroIn2 : StringIPT;
+				listaFiltOut2 : ListaPalavrasOPT;
+			}
 			connectors:
-			cn1 : StringCN bindings textoOut = textoIn;
-			cn2 : StringCN bindings filtroOut = filtroIn;
-			cn3 : ListaPalavrasCN bindings listaFiltOut = listaFiltIn;
+			cn1 : StringCN bindings textoOut = textoIn1;
+			cn2 : StringCN bindings filtroOut1 = filtroIn1;
+			cn3 : ListaPalavrasCN bindings listaFiltOut1 = listaFiltIn;
 			cn4 : OrdenacaoCN bindings ordemOut = ordemIn;
 			cn5 : ListaPalavrasCN bindings listaOrdemOut = listaOrdemIn;
+		cn6 : StringCN bindings textoOut = textoIn2;
+			cn7 : StringCN bindings filtroIn2 = filtroOut2;
+			cn8 : ListaPalavrasCN bindings listaFiltOut2 = listaFiltIn;
 		}
 	}
 	boundary component def ProcessadorArquivoCP {
