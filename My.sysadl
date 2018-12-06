@@ -117,12 +117,14 @@ package Components {
 			ProcessadorArquivoCP : ProcessadorArquivoCP {
 				using
 				ports:
-				textoOut : StringOPT;
+				textoOut2 : StringOPT [ 1, -1 ];
 			}
 			SeparadorTextoCP : SeparadorTextoCP {
 				using
 				ports:
-				textoIn : StringIPT;
+				textoIn1 : StringIPT;
+				textoIn2 : StringIPT;
+				textoIn3 : StringIPT;
 				filtroIn : StringIPT;
 				listaFiltOut : ListaPalavrasOPT;
 			}
@@ -148,12 +150,24 @@ package Components {
 				ports:
 				listaOrdemIn : ListaPalavrasIPT;
 			}
+			ProcessadorArquivoCP : ProcessadorArquivoCP {
+				using
+				ports:
+				textoOut1 : StringOPT;
+			}
+			ProcessadorArquivoCP : ProcessadorArquivoCP {
+				using
+				ports:
+				textoOut : StringOPT;
+			}
 			connectors:
-			cn1 : StringCN bindings textoOut = textoIn;
+			cn1 : StringCN bindings textoOut2 = textoIn2;
 			cn2 : StringCN bindings filtroOut = filtroIn;
 			cn3 : ListaPalavrasCN bindings listaFiltOut = listaFiltIn;
 			cn4 : OrdenacaoCN bindings ordemOut = ordemIn;
 			cn5 : ListaPalavrasCN bindings listaOrdemOut = listaOrdemIn;
+		cn6 : StringCN bindings textoOut1 = textoIn1;
+			cn7 : StringCN bindings textoOut = textoIn3;
 		}
 	}
 	boundary component def ProcessadorArquivoCP {
