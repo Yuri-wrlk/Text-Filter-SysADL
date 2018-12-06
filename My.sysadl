@@ -245,13 +245,19 @@ activity def FiltrarTextoAC ( textoOriginal : String, filtro : String ) : (
 				using pins : textoOriginal : String;
 			}
 			FiltrarPalavrasAN : FiltrarPalavrasAN {
-				using pins : listaBruta : ListaDePalavras;
+				using pins : listaBruta1 : ListaDePalavras;
 				filtro : String;
 			}
+			FiltrarPorTamAN : FiltrarPorTamAN {
+				using pins : listaBruta2 : ListaDePalavras;
+				filtro3 : String;
+			}
 			delegate textoOriginal to textoOriginal flow from SepararPalavrasAN to
-			listaBruta
-			delegate listaPalavras to FiltrarPalavrasAN
+			listaBruta1
+			delegate listaPalavras to FiltrarPalavrasAN flow from SepararPalavrasAN to
+			listaBruta2
 			delegate filtro to filtro
+			delegate filtro to filtro3
 		}
 	}
 	action def SepararPalavrasAN ( textoOriginal : String ) : ListaDePalavras {
@@ -315,5 +321,12 @@ activity def OrdenarPalavrasAC ( listaFiltrada : ListaDePalavras, ordem :
 	constraint PosOrdenarEQ ( listaFiltrada : ListaDePalavras, ordem : Ordenacao )
 	: ( listaOrdenada : ListaDePalavras ) {
 		equation = "size(listaOrdenada) == size(listaFiltrada)"
+	}
+action def FiltrarPorTamAN ( filtro3 : String, listaBruta : ListaDePalavras ) :
+	ListaDePalavras {
+		constraint : post-condition PosFiltrarPalavrasEQ
+		delegate filtro3 to filtro2
+		delegate listaBruta to listaBruta
+		delegate FiltrarPorTamAN to listaFiltrada
 	}
 }
